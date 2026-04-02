@@ -1,0 +1,13 @@
+# ambiente virtual
+venv/
+
+# dados grandes (não subir pro GitHub)
+data/
+db/
+
+# python
+__pycache__/
+*.pyc
+
+# sistema
+.DS_Store
