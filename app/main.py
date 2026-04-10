@@ -24,8 +24,7 @@ uf = st.selectbox("UF", [""] + ufs, key="uf")
 
 #botão
 if st.button("Buscar"):
-    if busca_nome:
-        query += f" AND razao_social ILIKE '%{busca_nome}%'"
+    query = "SELECT * FROM empresas WHERE 1=1"
 
     if busca_nome:
         query += f" AND razao_social ILIKE '%{busca_nome}%'"
