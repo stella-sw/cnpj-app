@@ -275,7 +275,7 @@ for codigo, sigla in UF_MAP.items():
     con.execute(f"""
     UPDATE estabelecimentos
     SET uf_sigla = '{sigla}'
-    WHERE {uf_col} = '{codigo}'
+    WHERE {UF_COL} = '{codigo}'
     """)
 
 print("UF normalizada com sucesso!")
