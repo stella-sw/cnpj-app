@@ -1,6 +1,8 @@
 import os
 import zipfile
 import duckdb
+import re
+import pandas as pd
 
 
 # =========================
@@ -196,13 +198,94 @@ FROM read_csv_auto(
 );
 """)
 
+# =========================
+# NORMALIZAÇÃO UF (CORRETA)
+# =========================
+
+UF_MAP = {
+    "11": "RO", "12": "AC", "13": "AM", "14": "RR", "15": "PA",
+    "16": "AP", "17": "TO",
+    "21": "MA", "22": "PI", "23": "CE", "24": "RN", "25": "PB",
+    "26": "PE", "27": "AL", "28": "SE", "29": "BA",
+    "31": "MG", "32": "ES", "33": "RJ", "35": "SP",
+    "41": "PR", "42": "SC", "43": "RS",
+    "50": "MS", "51": "MT", "52": "GO", "53": "DF"
+}
+
+# ⚠️ DESCUBRA UMA VEZ QUAL É A COLUNA REAL (use o que você já viu: column07)
+UF_COL = "column07"   # <-- AJUSTE AQUI SE PRECISAR
+
+# cria coluna
+con.execute("""
+ALTER TABLE estabelecimentos ADD COLUMN uf_sigla VARCHAR;
+""")
+
+# preenche em lote (rápido e seguro)
+con.execute(f"""
+UPDATE estabelecimentos
+SET uf_sigla = CASE {UF_COL}
+    WHEN '11' THEN 'RO'
+    WHEN '12' THEN 'AC'
+    WHEN '13' THEN 'AM'
+    WHEN '14' THEN 'RR'
+    WHEN '15' THEN 'PA'
+    WHEN '16' THEN 'AP'
+    WHEN '17' THEN 'TO'
+    WHEN '21' THEN 'MA'
+    WHEN '22' THEN 'PI'
+    WHEN '23' THEN 'CE'
+    WHEN '24' THEN 'RN'
+    WHEN '25' THEN 'PB'
+    WHEN '26' THEN 'PE'
+    WHEN '27' THEN 'AL'
+    WHEN '28' THEN 'SE'
+    WHEN '29' THEN 'BA'
+    WHEN '31' THEN 'MG'
+    WHEN '32' THEN 'ES'
+    WHEN '33' THEN 'RJ'
+    WHEN '35' THEN 'SP'
+    WHEN '41' THEN 'PR'
+    WHEN '42' THEN 'SC'
+    WHEN '43' THEN 'RS'
+    WHEN '50' THEN 'MS'
+    WHEN '51' THEN 'MT'
+    WHEN '52' THEN 'GO'
+    WHEN '53' THEN 'DF'
+END
+""")
+
+con.execute("""
+ALTER TABLE estabelecimentos
+ADD COLUMN IF NOT EXISTS uf_sigla VARCHAR;
+""")
+
+# mapa UF
+UF_MAP = {
+    "11": "RO", "12": "AC", "13": "AM", "14": "RR", "15": "PA",
+    "16": "AP", "17": "TO",
+    "21": "MA", "22": "PI", "23": "CE", "24": "RN", "25": "PB",
+    "26": "PE", "27": "AL", "28": "SE", "29": "BA",
+    "31": "MG", "32": "ES", "33": "RJ", "35": "SP",
+    "41": "PR", "42": "SC", "43": "RS",
+    "50": "MS", "51": "MT", "52": "GO", "53": "DF"
+}
+
+# preenche corretamente usando a coluna detectada
+for codigo, sigla in UF_MAP.items():
+    con.execute(f"""
+    UPDATE estabelecimentos
+    SET uf_sigla = '{sigla}'
+    WHERE {uf_col} = '{codigo}'
+    """)
+
+print("UF normalizada com sucesso!")
+
 cols = con.execute("DESCRIBE estabelecimentos").fetchdf()["column_name"].tolist()
 
 con.execute(f"ALTER TABLE estabelecimentos RENAME COLUMN {cols[0]} TO cnpj_basico;")
 con.execute(f"ALTER TABLE estabelecimentos RENAME COLUMN {cols[1]} TO cnpj_ordem;")
 con.execute(f"ALTER TABLE estabelecimentos RENAME COLUMN {cols[2]} TO cnpj_dv;")
-con.execute(f"ALTER TABLE estabelecimentos RENAME COLUMN {cols[7]} TO uf;")
-con.execute(f"ALTER TABLE estabelecimentos RENAME COLUMN {cols[8]} TO municipio;")
+con.execute(f"ALTER TABLE estabelecimentos RENAME COLUMN {cols[7]} TO municipio;")
 
 print("Estabelecimentos carregados!")
 
