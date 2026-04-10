@@ -62,5 +62,16 @@ if st.button("Buscar"):
             st.write(f"**Razão Social:** {empresa['razao_social']}")
             st.write(f"**UF:** {empresa['uf']}")
             st.write(f"**Município:** {empresa['municipio']}")
+
+            st.subheader("Estabelecimentos")
+
+            estabs = con.execute(f"""
+            SELECT cnpj_ordem, cnpj_dv, uf, municipio
+            FROM estabelecimentos
+            WHERE cnpj_basico = '{empresa['cnpj_basico']}'
+            LIMIT 10
+            """).fetchdf()
+
+            st.dataframe(estabs)
     except Exception as e:
         st.error(f"Erro: {e}")

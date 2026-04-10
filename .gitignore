@@ -4,6 +4,8 @@ venv/
 # dados grandes (não subir pro GitHub)
 data/
 db/
+*.zip
+*duckdb
 
 # python
 __pycache__/

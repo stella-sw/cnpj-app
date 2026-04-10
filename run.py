@@ -22,4 +22,4 @@ print("Iniciando aplicação...")
 
 import sys
 
-subprocess.run([sys.executable, "-m", "streamlit", "run", "app/main.py"])
+subprocess.run([sys.executable, "scripts/pipeline.py"])
