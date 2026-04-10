@@ -18,9 +18,9 @@ with col1:
 with col2:
     busca_cnpj = st.text_input("CNPJ")
 
-ufs = con.execute("SELECT DISTINCT uf FROM empresas").fetchdf()["uf"].tolist()
+#ufs = con.execute("SELECT DISTINCT uf FROM empresas").fetchdf()["uf"].tolist()
 
-uf = st.selectbox("UF", [""] + ufs, key="uf")
+#uf = st.selectbox("UF", [""] + ufs, key="uf")
 
 #botão
 if st.button("Buscar"):
@@ -31,9 +31,10 @@ if st.button("Buscar"):
     
     if busca_cnpj:
         query += f" AND cnpj_basico LIKE '%{busca_cnpj}%'"
-    
+    '''
     if uf:
         query += f" AND uf = '{uf}'"
+    '''
     
     try:
         df = con.execute(query + " LIMIT 50").fetchdf()
