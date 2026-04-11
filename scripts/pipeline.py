@@ -77,10 +77,6 @@ def extract_and_rename():
 
         # evita sobrescrever sem necessidade
         if old_path != new_path:
-            if os.path.exists(new_path):
-                os.remove(new_path)
-
-            os.rename(old_path, new_path)
             print(f"Renomeado: {f} → {new_name}")
 
 extract_and_rename()
@@ -163,7 +159,7 @@ con.execute(f"""
 CREATE OR REPLACE TABLE empresas AS
 SELECT *
 FROM read_csv_auto(
-    '{empresas_file}',
+    '{DATA_DIR}/empresas*.csv',
     delim=';',
     header=False,
     ignore_errors=true,
@@ -187,105 +183,26 @@ print("Empresas carregadas!")
 # ESTABELECIMENTOS
 # =========================
 con.execute(f"""
-CREATE OR REPLACE TABLE estabelecimentos AS
-SELECT *
-FROM read_csv_auto(
-    '{estabs_file}',
-    delim=';',
-    header=False,
-    ignore_errors=true,
-    all_varchar=true
-);
-""")
-
-# =========================
-# NORMALIZAÇÃO UF (CORRETA)
-# =========================
-
-UF_MAP = {
-    "11": "RO", "12": "AC", "13": "AM", "14": "RR", "15": "PA",
-    "16": "AP", "17": "TO",
-    "21": "MA", "22": "PI", "23": "CE", "24": "RN", "25": "PB",
-    "26": "PE", "27": "AL", "28": "SE", "29": "BA",
-    "31": "MG", "32": "ES", "33": "RJ", "35": "SP",
-    "41": "PR", "42": "SC", "43": "RS",
-    "50": "MS", "51": "MT", "52": "GO", "53": "DF"
-}
-
-# ⚠️ DESCUBRA UMA VEZ QUAL É A COLUNA REAL (use o que você já viu: column07)
-UF_COL = "column07"   # <-- AJUSTE AQUI SE PRECISAR
-
-# cria coluna
-con.execute("""
-ALTER TABLE estabelecimentos ADD COLUMN uf_sigla VARCHAR;
-""")
-
-# preenche em lote (rápido e seguro)
-con.execute(f"""
-UPDATE estabelecimentos
-SET uf_sigla = CASE {UF_COL}
-    WHEN '11' THEN 'RO'
-    WHEN '12' THEN 'AC'
-    WHEN '13' THEN 'AM'
-    WHEN '14' THEN 'RR'
-    WHEN '15' THEN 'PA'
-    WHEN '16' THEN 'AP'
-    WHEN '17' THEN 'TO'
-    WHEN '21' THEN 'MA'
-    WHEN '22' THEN 'PI'
-    WHEN '23' THEN 'CE'
-    WHEN '24' THEN 'RN'
-    WHEN '25' THEN 'PB'
-    WHEN '26' THEN 'PE'
-    WHEN '27' THEN 'AL'
-    WHEN '28' THEN 'SE'
-    WHEN '29' THEN 'BA'
-    WHEN '31' THEN 'MG'
-    WHEN '32' THEN 'ES'
-    WHEN '33' THEN 'RJ'
-    WHEN '35' THEN 'SP'
-    WHEN '41' THEN 'PR'
-    WHEN '42' THEN 'SC'
-    WHEN '43' THEN 'RS'
-    WHEN '50' THEN 'MS'
-    WHEN '51' THEN 'MT'
-    WHEN '52' THEN 'GO'
-    WHEN '53' THEN 'DF'
-END
-""")
-
-con.execute("""
-ALTER TABLE estabelecimentos
-ADD COLUMN IF NOT EXISTS uf_sigla VARCHAR;
-""")
-
-# mapa UF
-UF_MAP = {
-    "11": "RO", "12": "AC", "13": "AM", "14": "RR", "15": "PA",
-    "16": "AP", "17": "TO",
-    "21": "MA", "22": "PI", "23": "CE", "24": "RN", "25": "PB",
-    "26": "PE", "27": "AL", "28": "SE", "29": "BA",
-    "31": "MG", "32": "ES", "33": "RJ", "35": "SP",
-    "41": "PR", "42": "SC", "43": "RS",
-    "50": "MS", "51": "MT", "52": "GO", "53": "DF"
-}
-
-# preenche corretamente usando a coluna detectada
-for codigo, sigla in UF_MAP.items():
-    con.execute(f"""
-    UPDATE estabelecimentos
-    SET uf_sigla = '{sigla}'
-    WHERE {UF_COL} = '{codigo}'
+    CREATE OR REPLACE TABLE estabelecimentos AS
+    SELECT *
+    FROM read_csv_auto(
+        '{DATA_DIR}/estabelecimentos*.csv',
+        delim=';',
+        header=False,
+        ignore_errors=true,
+        all_varchar=true
+    );
     """)
 
-print("UF normalizada com sucesso!")
-
-cols = con.execute("DESCRIBE estabelecimentos").fetchdf()["column_name"].tolist()
-
-con.execute(f"ALTER TABLE estabelecimentos RENAME COLUMN {cols[0]} TO cnpj_basico;")
-con.execute(f"ALTER TABLE estabelecimentos RENAME COLUMN {cols[1]} TO cnpj_ordem;")
-con.execute(f"ALTER TABLE estabelecimentos RENAME COLUMN {cols[2]} TO cnpj_dv;")
-con.execute(f"ALTER TABLE estabelecimentos RENAME COLUMN {cols[7]} TO municipio;")
+rename_by_index(con, "estabelecimentos", {
+    0: "cnpj_basico",
+    1: "cnpj_ordem",
+    2: "cnpj_dv",
+    5: "situacao_cadastral",
+    11: "cnae_fiscal",
+    19: "uf",
+    20: "municipio"
+})
 
 print("Estabelecimentos carregados!")
 
@@ -293,104 +210,95 @@ print("Estabelecimentos carregados!")
 # SOCIOS
 # =========================
 
-if socios_file:
-    con.execute(f"""
-    CREATE OR REPLACE TABLE socios AS
-    SELECT *
-    FROM read_csv_auto(
-        '{socios_file}',
-        delim=';',
-        header=False,
-        ignore_errors=true,
-        all_varchar=true
-    );
-    """)
+con.execute(f"""
+CREATE OR REPLACE TABLE socios AS
+SELECT *
+FROM read_csv_auto(
+    '{DATA_DIR}/socios*.csv',
+    delim=';',
+    header=False,
+    ignore_errors=true,
+    all_varchar=true
+);
+""")
 
-    rename_by_index(con, "socios", {
-        0: "cnpj_basico",
-        1: "identificador_socio",
-        2: "nome_socio"
-    })
+rename_by_index(con, "socios", {
+    0: "cnpj_basico",
+    1: "identificador_socio",
+    2: "nome_socio"
+})
 
-    print("Sócios carregados!")
-else:
-    print("Arquivo de sócios não encontrado.")
+print("Sócios carregados!")
 
 
 # =========================
 # CNAES
 # =========================
 
-if cnaes_file:
-    con.execute(f"""
-    CREATE OR REPLACE TABLE cnaes AS
-    SELECT *
-    FROM read_csv_auto(
-        '{cnaes_file}',
-        delim=';',
-        header=False,
-        ignore_errors=true,
-        all_varchar=true
-    );
-    """)
+con.execute(f"""
+CREATE OR REPLACE TABLE cnaes AS
+SELECT *
+FROM read_csv_auto(
+    '{DATA_DIR}/cnae*.csv',
+    delim=';',
+    header=False,
+    ignore_errors=true,
+    all_varchar=true
+);
+""")
 
-    rename_by_index(con, "cnaes", {
-        0: "codigo",
-        1: "descricao"
-    })
+rename_by_index(con, "cnaes", {
+    0: "codigo",
+    1: "descricao"
+})
 
-    print("CNAEs carregados!")
-else:
-    print("Arquivo CNAE não encontrado.")
+print("CNAEs carregados!")
 
 # =========================
 # NATUREZAS JURIDICAS
 # =========================
 
-if nat_file:
-    con.execute(f"""
-    CREATE OR REPLACE TABLE naturezas_juridicas AS
-    SELECT *
-    FROM read_csv_auto(
-        '{nat_file}',
-        delim=';',
-        header=False,
-        ignore_errors=true,
-        all_varchar=true
-    );
-    """)
+con.execute(f"""
+CREATE OR REPLACE TABLE naturezas_juridicas AS
+SELECT *
+FROM read_csv_auto(
+    '{DATA_DIR}/natureza*.csv',
+    delim=';',
+    header=False,
+    ignore_errors=true,
+    all_varchar=true
+);
+""")
 
-    rename_by_index(con, "naturezas_juridicas", {
-        0: "codigo",
-        1: "descricao"
-    })
+rename_by_index(con, "naturezas_juridicas", {
+    0: "codigo",
+    1: "descricao"
+})
 
-    print("Naturezas jurídicas carregadas!")
-else:
-    print("Arquivo de naturezas jurídicas não encontrado.")
+print("Naturezas jurídicas carregadas!")
 
 # =========================
 # MUNICIPIOS
 # =========================
 
-if municipios_file:
-    con.execute(f"""
-    CREATE OR REPLACE TABLE municipios AS
-    SELECT *
-    FROM read_csv_auto(
-        '{municipios_file}',
-        delim=';',
-        header=False,
-        ignore_errors=true,
-        all_varchar=true
-    );
-    """)
-    rename_by_index(con, "municipios", {
-        0: "codigo",
-        1: "descricao"
-    })
-else:
-    print("Arquivo de municípios não encontrado.")
+con.execute(f"""
+CREATE OR REPLACE TABLE municipios AS
+SELECT *
+FROM read_csv_auto(
+    '{DATA_DIR}/*munic*.csv',
+    delim=';',
+    header=False,
+    ignore_errors=true,
+    all_varchar=true
+);
+""")
+
+rename_by_index(con, "municipios", {
+    0: "codigo",
+    1: "descricao"
+})
+
+print("Municípios carregados!")
 
 
 print("Pipeline concluído com sucesso!")
