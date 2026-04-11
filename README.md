@@ -6,26 +6,44 @@ Aplicação para ingestão, processamento e visualização de dados públicos do
 
 ## Funcionalidades
 
-- Busca por **razão social**
-- Busca por **CNPJ**
+- Busca por razão social
+- Busca por CNPJ
 - Filtros adicionais:
   - UF
   - Município
   - CNAE principal
-- Visualização de **dados cadastrais da empresa**
-- Listagem de **estabelecimentos vinculados**
-- Visualização de **sócios**
-- Exibição do **CNAE principal**
+- Visualização de dados cadastrais da empresa
+- Listagem de estabelecimentos vinculados
+- Visualização de sócios
+- Exibição do CNAE principal
 - Interface interativa com atualização dinâmica
 
 ---
 
 ## Tecnologias
 
-- **Python**
-- **DuckDB** (banco analítico local)
-- **Streamlit** (interface web)
-- **Pandas** (manipulação de dados)
+- Python
+- DuckDB (banco analítico local)
+- Streamlit (interface web)
+- Pandas (manipulação de dados)
+
+---
+
+## Uso de Inteligência Artificial
+
+No desenvolvimento deste projeto foram utilizados assistentes de código baseados em Inteligência Artificial.
+
+**Tecnologia utilizada**
+- ChatGPT (OpenAI)
+
+**Atividades em que a IA foi utilizada**
+- Apoio na estruturação do pipeline de dados
+- Sugestões para tratamento e padronização de dados
+- Auxílio na identificação e correção de erros
+- Melhoria na organização do código e boas práticas
+- Apoio na documentação do projeto (README)
+
+A utilização da IA teve caráter assistivo, não substituindo o entendimento e as decisões de implementação por parte do desenvolvedor.
 
 ---
 
