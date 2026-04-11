@@ -74,11 +74,13 @@ O pipeline foi projetado para lidar com a estrutura distribuída dos dados do CN
 ---
 
 ## Como executar
+
 ### 1. Clonar o repositório
 
 ```bash
 git clone <url-do-repositorio>
 cd <nome-do-repositorio>
+```
 
 ### 2. Criar ambiente virtual
 
@@ -86,30 +88,24 @@ cd <nome-do-repositorio>
 python3 -m venv venv
 source venv/bin/activate # Linux/Mac
 venv\Scripts\activate # Windows
+```
 
-### 2. Instalar dependências
+### 3. Instalar dependências
 
 ```bash
 pip install -r requirements.txt
+```
 
-### 3. Adicionar os dados
+### 4. Adicionar os dados
 
 Acesse o portal da Receita Federal: https://arquivos.receitafederal.gov.br/index.php/s/YggdBLfdninEJX9
 
 Baixe os arquivos .zip desejados (ex: Empresas, Estabelecimentos, Sócios, CNAE, etc.) e coloque-os na pasta data/
 
-Estrutura esperada:
-data/
-├── Empresas0.zip
-├── Estabelecimentos0.zip
-├── Socios0.zip
-├── Cnaes.zip
-├── Municipios.zip
-...
-
 Não é necessário extrair manualmente — o pipeline faz isso automaticamente.
 
-### 4. Executar
+### 5. Executar
 
 ```bash
-streamlit run main.py
+python run.py
+```
