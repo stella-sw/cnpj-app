@@ -16,11 +16,11 @@ Aplicação para ingestão, processamento e visualização de dados públicos do
 - Listagem de **estabelecimentos vinculados**
 - Visualização de **sócios**
 - Exibição do **CNAE principal**
-- ⚡ Interface interativa com atualização dinâmica
+- Interface interativa com atualização dinâmica
 
 ---
 
-## 🛠 Tecnologias
+## Tecnologias
 
 - **Python**
 - **DuckDB** (banco analítico local)
