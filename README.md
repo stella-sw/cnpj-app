@@ -116,6 +116,8 @@ pip install -r requirements.txt
 
 ### 4. Adicionar os dados
 
+**Crie uma pasta data/ no diretório atual**
+
 Acesse o portal da Receita Federal: https://arquivos.receitafederal.gov.br/index.php/s/YggdBLfdninEJX9
 
 Baixe os arquivos .zip desejados:
