@@ -21,8 +21,25 @@ if len(os.listdir(DATA_DIR)) == 0:
 # EXTRAÇÃO
 # =========================
 
-def extract_and_rename():
-    print("Processando arquivos ZIP...")
+def extract_and_merge():
+    # =========================
+    # LIMPAR ARQUIVOS NÃO-ZIP
+    # =========================
+    print("Limpando arquivos antigos...")
+
+    for f in os.listdir(DATA_DIR):
+        file_path = os.path.join(DATA_DIR, f)
+
+        # mantém apenas .zip
+        if not f.lower().endswith(".zip"):
+            try:
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+                    print(f"Removido (pré-limpeza): {f}")
+            except Exception as e:
+                print(f"Erro ao remover {f}: {e}")    
+    
+    print("Extraindo ZIPs...")
 
     for file in os.listdir(DATA_DIR):
         if not file.endswith(".zip"):
@@ -31,110 +48,91 @@ def extract_and_rename():
         zip_path = os.path.join(DATA_DIR, file)
 
         if not zipfile.is_zipfile(zip_path):
-            print(f"Pulando (não é zip válido): {file}")
+            print(f"Pulando inválido: {file}")
             continue
-
-        print(f"Extraindo: {file}")
 
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(DATA_DIR)
 
-    # =========================
-    # RENOMEAR AUTOMATICAMENTE
-    # =========================
+    print("Mesclando CSVs...")
 
+    groups = {
+        "empresas": [],
+        "estabelecimentos": [],
+        "socios": [],
+        "cnaes": [],
+        "naturezas": [],
+        "municipios": []
+    }
+
+    # Agrupar arquivos
     for f in os.listdir(DATA_DIR):
-        name = f.lower()
-
-        if f.endswith(".zip"):
+        if f.lower().endswith(".zip"):
             continue
 
-        old_path = os.path.join(DATA_DIR, f)
+        name = f.lower()
 
-        # detectar tipo
         if "empre" in name:
-            new_name = "empresas.csv"
-
+            groups["empresas"].append(f)
         elif "estabele" in name:
-            new_name = "estabelecimentos.csv"
-
+            groups["estabelecimentos"].append(f)
         elif "socio" in name:
-            new_name = "socios.csv"
-
+            groups["socios"].append(f)
         elif "cnae" in name:
-            new_name = "cnaes.csv"
-
+            groups["cnaes"].append(f)
         elif "natureza" in name or "natju" in name:
-            new_name = "naturezas.csv"
-
+            groups["naturezas"].append(f)
         elif "munic" in name:
-            new_name = "municipios.csv"
+            groups["municipios"].append(f)
 
-        else:
+    # Merge + delete seguro
+    for group_name, files in groups.items():
+        if not files:
             continue
 
-        new_path = os.path.join(DATA_DIR, new_name)
+        output_path = os.path.join(DATA_DIR, f"{group_name}.csv")
 
-        # evita sobrescrever sem necessidade
-        if old_path != new_path:
-            print(f"Renomeado: {f} → {new_name}")
+        print(f"Mesclando {group_name} ({len(files)} arquivos)...")
 
-extract_and_rename()
+        with open(output_path, "w", encoding="utf-8", newline="") as outfile:
+            header_written = False
 
-# =========================
-# AJUSTAR NOMES
-# =========================
+            for file in sorted(files):
+                file_path = os.path.join(DATA_DIR, file)
 
-def find_file(tipo):
-    for f in os.listdir(DATA_DIR):
-        name = f.lower()
+                try:
+                    with open(file_path, "r", encoding="utf-8", errors="ignore") as infile:
+                        for i, line in enumerate(infile):
+                            if i == 0:
+                                if not header_written:
+                                    outfile.write(line)
+                                    header_written = True
+                            else:
+                                outfile.write(line)
 
-        if f.endswith(".zip"):
-            continue
+                    # delete ONLY after successful processing
+                    os.remove(file_path)
+                    print(f"Removido: {file}")
 
-        if tipo == "empresas" and "empre" in name:
-            return os.path.join(DATA_DIR, f)
+                except Exception as e:
+                    print(f"Erro ao processar {file}: {e}")
+                    print("Arquivo NÃO foi deletado")
 
-        if tipo == "estabelecimentos" and "estabele" in name:
-            return os.path.join(DATA_DIR, f)
+    print("Merge concluído e arquivos limpos")
 
-        if tipo == "socios" and "socio" in name:
-            return os.path.join(DATA_DIR, f)
+extract_and_merge()
 
-        if tipo == "cnaes" and "cnae" in name:
-            return os.path.join(DATA_DIR, f)
 
-        if tipo == "naturezas" and ("natureza" in name or "natju" in name):
-            return os.path.join(DATA_DIR, f)
+empresas_file = os.path.join(DATA_DIR, "empresas.csv")
+estabs_file = os.path.join(DATA_DIR, "estabelecimentos.csv")
+socios_file = os.path.join(DATA_DIR, "socios.csv")
+cnaes_file = os.path.join(DATA_DIR, "cnaes.csv")
+nat_file = os.path.join(DATA_DIR, "naturezas.csv")
+municipios_file = os.path.join(DATA_DIR, "municipios.csv")
 
-        if tipo == "municipios" and "munic" in name:
-            return os.path.join(DATA_DIR, f)
-
-    return None
-
-empresas_file = find_file("empresas")
-estabs_file = find_file("estabelecimentos")
-socios_file = find_file("socios")
-cnaes_file = find_file("cnaes")
-nat_file = find_file("naturezas")
-municipios_file = find_file("municipios")
-
-print("Arquivos encontrados:")
-print("Empresas:", empresas_file)
-print("Estabelecimentos:", estabs_file)
-print("Socios:", socios_file)
-print("CNAEs:", cnaes_file)
-print("Naturezas:", nat_file)
-print("Municipios:", municipios_file)
-
-'''
-
-if empresas_file is None:
-    raise Exception("Arquivo de empresas não encontrado na pasta data/")
-
-if estabs_file is None:
-    raise Exception("Arquivo de estabelecimentos não encontrado na pasta data/")
-'''
+for f in [empresas_file, estabs_file, socios_file, cnaes_file, nat_file, municipios_file]:
+    if not os.path.exists(f):
+        print(f"Arquivo faltando: {f}")
 
 # =========================
 # LOAD DUCKDB
