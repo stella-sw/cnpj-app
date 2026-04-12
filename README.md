@@ -119,8 +119,8 @@ pip install -r requirements.txt
 Acesse o portal da Receita Federal: https://arquivos.receitafederal.gov.br/index.php/s/YggdBLfdninEJX9
 
 Baixe os arquivos .zip desejados:
-- Implementação suporta apenas arquivos de Empresas, Estabelecimentos, Sócios, CNAE, Naturezas e Municípios
-- É necessário pelo menos um de cada
+- Esta implementação suporta apenas arquivos de Empresas, Estabelecimentos, Sócios, CNAEs, Naturezas jurídicas e Municípios
+- É necessário pelo menos um arquivo de cada
 - Coloque os arquivos na pasta data/
 
 Não é necessário extrair manualmente — o pipeline faz isso automaticamente.
