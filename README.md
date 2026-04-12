@@ -96,8 +96,8 @@ O pipeline foi projetado para lidar com a estrutura distribuída dos dados do CN
 ### 1. Clonar o repositório
 
 ```bash
-git clone <url-do-repositorio>
-cd <nome-do-repositorio>
+git clone https://github.com/stella-sw/cnpj-app.git
+cd cnpj-app
 ```
 
 ### 2. Criar ambiente virtual
@@ -118,7 +118,10 @@ pip install -r requirements.txt
 
 Acesse o portal da Receita Federal: https://arquivos.receitafederal.gov.br/index.php/s/YggdBLfdninEJX9
 
-Baixe os arquivos .zip desejados (ex: Empresas, Estabelecimentos, Sócios, CNAE, etc.) e coloque-os na pasta data/
+Baixe os arquivos .zip desejados:
+- Implementação suporta apenas arquivos de Empresas, Estabelecimentos, Sócios, CNAE, Naturezas e Municípios
+- É necessário pelo menos um de cada
+- Coloque os arquivos na pasta data/
 
 Não é necessário extrair manualmente — o pipeline faz isso automaticamente.
 
